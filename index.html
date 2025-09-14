@@ -1,225 +1,327 @@
-<!--
-  ফাইল: Tithi_Birthday_30page_site.html
-  নির্দেশনা: আপনার GF (তিথি) এর ছবি same folder-এ "tithi.jpg" নামে রাখুন।
-  এই একটিই HTML ফাইল ৩০টি পেজ/স্লাইড সিমুলেট করে (JS দিয়ে)。
-  ব্রাউজারে খুলে উপরের Next / Prev বা কীবোর্ড তীর (← →) দিয়ে নেভিগেট করুন।
--->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>শুভ জন্মদিন তিথি — তোমার জন্য</title>
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#ff3366;--soft:#f7f7fb}
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#0b1220 0%, #071025 60%);font-family: 'Noto Sans Bengali', Arial, sans-serif;color:var(--soft);overflow:hidden}
-    .app{height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-    .stage{width:100%;max-width:980px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));border-radius:18px;box-shadow:0 10px 40px rgba(2,6,23,0.7);overflow:hidden;position:relative}
-    header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    header h1{margin:0;font-size:18px;letter-spacing:0.6px}
-    header .meta{font-size:13px;opacity:0.85}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>শুভ জন্মদিন, প্রিয়তমা!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styles */
+        body {
+            font-family: 'Tiro Bangla', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #fce4ec;
+            color: #4a148c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
 
-    .content{padding:28px;min-height:520px;display:flex;gap:20px}
-    .left{flex:0 0 360px;display:flex;flex-direction:column;align-items:center;gap:14px}
-    .photo{width:320px;height:420px;border-radius:14px;overflow:hidden;border:6px solid rgba(255,255,255,0.04);position:relative}
-    .photo img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(1.02) saturate(1.05)}
-    .ribbon{position:absolute;left:12px;top:12px;background:linear-gradient(90deg,var(--accent),#ff73a7);padding:6px 10px;border-radius:8px;font-weight:700}
-    .sparkles{position:absolute;inset:0;pointer-events:none}
+        .page {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            transform: scale(0.95);
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+        }
 
-    .right{flex:1;display:flex;flex-direction:column}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
-    .message{min-height:320px;display:flex;align-items:center;justify-content:center;padding:12px;font-size:20px;line-height:1.6;text-align:center}
-    .controls{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
-    .navs{display:flex;gap:12px}
-    button.icon{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--soft);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700}
-    button.icon:active{transform:translateY(2px)}
-    .page-ind{font-size:13px;opacity:0.9}
+        .page.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 10;
+        }
 
-    .hearts{position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-    .heart{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent),#ff7aa0);box-shadow:0 8px 18px rgba(255,50,120,0.16);transform:translateY(0);animation:pop 3s infinite}
-    @keyframes pop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.08)}100%{transform:translateY(0) scale(1)}}
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
-    /* Typing effect */
-    .typed{font-weight:700;font-size:22px}
-    .small{font-size:15px;opacity:0.95}
+        @keyframes bounceIn {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
 
-    /* confetti canvas */
-    canvas.conf{position:absolute;left:0;top:0;pointer-events:none}
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
 
-    /* responsive */
-    @media (max-width:880px){.content{flex-direction:column}.left{order:2}.photo{width:90%;height:380px}} 
-  </style>
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-20px) translateX(10px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* --- Elements --- */
+        .header {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: fadeIn 2s forwards;
+            color: #d81b60;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .photo-container {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid #d81b60;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            animation: pulse 3s infinite;
+        }
+
+        .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message {
+            font-size: 1.5em;
+            margin-top: 20px;
+            max-width: 80%;
+            line-height: 1.6;
+            animation: bounceIn 2s ease-out;
+        }
+
+        .button-container {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+        }
+
+        .nav-button {
+            padding: 12px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 30px;
+            background-color: #d81b60;
+            color: white;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            background-color: #e94e7a;
+        }
+        
+        .floating-element {
+            position: absolute;
+            opacity: 0.8;
+            animation: float 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+        
+        .floating-heart {
+            font-size: 2em;
+            color: #ff5252;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffeb3b;
+            border-radius: 50%;
+            animation: confetti-fall 5s forwards;
+            opacity: 0;
+            animation-delay: var(--delay);
+            animation-duration: var(--duration);
+        }
+
+        /* Specific Page Styles */
+        #page1 { background-image: linear-gradient(to bottom, #ffebee, #ffcdd2); }
+        #page2 { background-image: linear-gradient(to right, #e3f2fd, #bbdefb); }
+        #page3 { background-color: #fffde7; }
+        #page4 { background-image: url('https://picsum.photos/1000/600'); background-size: cover; background-position: center; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); }
+        #page5 { background-color: #f3e5f5; }
+        #page6 { background-color: #b9f6ca; }
+        #page7 { background-color: #e0f7fa; }
+        #page8 { background-color: #fff9c4; }
+        #page9 { background-color: #ffccbc; }
+        #page10 { background-color: #ff9800; }
+    </style>
 </head>
 <body>
-  <div class="app">
-    <div class="stage" role="main">
-      <header>
-        <h1>শুভ জন্মদিন তিথি 🎂</h1>
-        <div class="meta">তিথি, ১২ অক্টোবর — তোমার জন্য একটা ছোট গল্প ও উপহার</div>
-      </header>
 
-      <div class="content">
-        <div class="left">
-          <div class="photo card">
-            <!-- ছবি-আপলোড: tithi.jpg নাম দিয়ে same folder-এ রাখুন -->
-            <img id="photo" src="tithi.jpg" alt="Tithi">
-            <div class="ribbon">Happy 12 Oct</div>
-            <svg class="sparkles" width="100%" height="100%" viewBox="0 0 200 300" preserveAspectRatio="none">
-              <g opacity="0.12" fill="white">
-                <circle cx="30" cy="40" r="2.8"/>
-                <circle cx="60" cy="120" r="1.8"/>
-                <circle cx="190" cy="80" r="2.2"/>
-                <circle cx="150" cy="210" r="1.6"/>
-              </g>
-            </svg>
-          </div>
-
-          <div class="card small" style="text-align:center">
-            <div id="subtext">প্রতিটি পেজে তোমার জন্য একটি কথা ও একটুকু ভালবাসা।</div>
-            <div style="margin-top:8px"><strong>Next/Prev</strong> চাপলে তুমি আরও সুন্দর মুহূর্তগুলো দেখবে।</div>
-          </div>
+    <div id="page1" class="page active">
+        <div class="header">🎂 শুভ জন্মদিন, প্রিয়তমা! ❤️</div>
+        <div class="photo-container">
+            <img src="tithi.jpg" alt="আমার প্রিয় মানুষ">
         </div>
-
-        <div class="right">
-          <div class="card message">
-            <div>
-              <div class="typed" id="typed"> </div>
-              <div style="height:10px"></div>
-              <div class="small" id="subline"></div>
-            </div>
-          </div>
-
-          <div class="controls">
-            <div class="navs">
-              <button class="icon" id="prev">◀ আগের</button>
-              <button class="icon" id="next">পরের ▶</button>
-            </div>
-            <div class="page-ind">পৃষ্ঠা <span id="pageno">1</span> / 30</div>
-          </div>
-
+        <div class="message">
+            আজ এই বিশেষ দিনে তোমার হাসিমুখ দেখতে চাই। তুমি আমার জীবনের সবচেয়ে বড় উপহার। জন্মদিনের অনেক অনেক শুভেচ্ছা!
         </div>
-      </div>
-
-      <div class="hearts">
-        <div class="heart">💖</div>
-        <div class="heart" style="animation-delay:0.7s">🌸</div>
-        <div class="heart" style="animation-delay:1.4s">🌹</div>
-      </div>
-
-      <canvas class="conf" id="confettiCanvas"></canvas>
     </div>
-  </div>
+    
+    <div id="page2" class="page">
+        <div class="header">কেন তুমি আমার কাছে বিশেষ?</div>
+        <div class="message">
+            <ul>
+                <li>তোমার হাসি আমার দিনকে উজ্জ্বল করে তোলে।</li>
+                <li>তোমার কথা আমার মনকে শান্ত করে।</li>
+                <li>তোমার ভালোবাসা আমাকে পূর্ণতা দেয়।</li>
+                <li>তুমি সবসময় আমার পাশে থাকো, এটাই আমার শক্তি।</li>
+            </ul>
+        </div>
+        <div class="floating-element floating-heart" style="top: 20%; left: 15%; animation-delay: 1s;">❤️</div>
+        <div class="floating-element floating-heart" style="top: 80%; left: 85%; animation-delay: 2s;">❤️</div>
+    </div>
 
-  <script>
-    const pages = [
-      "তিথি — আজকের দিনটা শুধুই তোমার। শুভ জন্মদিন! 🎉",
-      "তুমি আমার জীবনের সবচেয়ে মিষ্টি সপোর্ট এবং হাসির কারণ।",
-      "তুমি যখন পাশে থাকো, আমার প্রতিটি দিন উজ্জ্বল লাগে।",
-      "তোমার চোখে আমি আমার ভবিষ্যত দেখতে পাই।",
-      "তুমি হাসলে আমার মনও নাচে, তুমি রাগ করলে আমি সব ভুলে যাই।",
-      "তোমার কন্ঠের মিষ্টি কথা আমার সবচেয়ে প্রিয় গান।",
-      "একসাথে কাটানো প্রতিটি স্মৃতি আমার কাছে অমূল্য।",
-      "আমি প্রতিদিন তোমার জন্য আরও ভালো মানুষ হতে চাই।",
-      "তুমি হলো আমার নিরাপদ জায়গা, আমার ঘরবাড়ি—তুমি।",
-      "আজ তোমার জন্য ফুল, গান আর হাজারো ভালোবাসা।",
-      "তোমার হাতটা ধরলে সময় থেমে যায়—চাই তোমার হাত ছাড়বো না।",
-      "জন্মদিনে আমি তোমাকে বলতে চাই — তুমি বিশেষ, তুমি অসাধারণ।",
-      "তোমাকে দেখলে অজানা রঙে জীবন ভরিয়ে যায়।",
-      "তুমি যে হাসি দেও, ঐ হাসিই আমার প্রথম প্রার্থনা।",
-      "একটা প্রতিজ্ঞা: আমি তোমাকে সবসময় সৎভাবে ভালোবাসবো।",
-      "যত দূরেই যাই, মন চায় তোমার কাছে ফিরে আসতে।",
-      "তুমি যদি চান, আমি তোমার প্রতিটি স্বপ্নের সঙ্গী হব।",
-      "তুমি আমার নিয়মিত প্রেরণা, তোমার আছে আমার সব ভালবাসা।",
-      "যদি পৃথিবীতে আমার কাছে একটাই চাওয়া থাকে, সেটা হবে তোমার হাসি।",
-      "আজকের এই কেকটা তোমার জন্য — কাটা হলে সব চিন্তা কেটে যাবে।",
-      "এই ৩০টা পেজে আমি লিখেছি মুহূর্তগুলো, কিন্তু আমার ভালবাসা অসীম।",
-      "তুমি যখন কাঁদো, আমি সবে পাশে থাকবো; যখন হাসো, আকাশ হাসবে।",
-      "আমি তোমায় দেখে প্রতিদিনই নতুন প্রেমে পড়ি।",
-      "তুমি আমার জীবনের সবচেয়ে বড় ভাগ্য—তোমাকে পেয়ে কৃতজ্ঞ।",
-      "তুমি চাওলেই আমি দিনের আলো কিংবা রাতের চাঁদ হতে পারি তোমার জন্য।",
-      "জীবনটা যদি একটা গান, তুমি হবে তার সবচেয়ে সুন্দর সুর।",
-      "তুমি আমার কথা হলে মাধুর্য—আমি তোমার প্রতিটি নিশ্বাসে আছি।",
-      "শুধু আজ নয়—আগামীর প্রতিটি ১২ অক্টোবর তোমার পাশে থাকতে চাই।",
-      "তুমি আছো বলে আমার পৃথিবী পূর্ণ। শুভ জন্মদিন, তিথি — সব ভালবাসা তোমার।"
-    ];
+    <div id="page3" class="page">
+        <div class="header">আমাদের কিছু সুন্দর মুহূর্ত...</div>
+        <div class="message">
+            তোমার সাথে কাটানো প্রতিটি মুহূর্তই আমার কাছে অমূল্য। মনে আছে সেই প্রথম দেখা হওয়ার দিন? সেই দিন থেকেই আমার জীবন বদলে গেছে। [এখানে একটি বিশেষ স্মৃতির কথা লিখতে পারেন]
+        </div>
+    </div>
 
-    let idx = 0;
-    const typedEl = document.getElementById('typed');
-    const subline = document.getElementById('subline');
-    const pageno = document.getElementById('pageno');
-    const canvas = document.getElementById('confettiCanvas');
-    const stage = document.querySelector('.stage');
+    <div id="page4" class="page">
+        <div class="header">তোমার ছবি, আমার ভালোবাসা</div>
+        <div class="message">
+            এই পৃথিবীতে তোমার চেয়ে সুন্দর আর কিছুই নেই। তুমি আমার সব।
+        </div>
+    </div>
 
-    function showPage(i){
-      idx = (i + pages.length) % pages.length;
-      pageno.textContent = (idx+1);
-      typeText(pages[idx]);
-      subline.textContent = 'তুমি আমার কাছে সবচেয়ে প্রিয় — ' + (idx+1) + '/30';
-      burst(idx);
-    }
+    <div id="page5" class="page">
+        <div class="header">তোমার জন্য একটি কবিতা</div>
+        <div class="message">
+            তুমি আমার কবিতা, আমার ছন্দ,<br>
+            তুমি আমার ভালোবাসা, অফুরন্ত।<br>
+            তোমার মাঝে খুঁজে পাই আমি নিজেকে,<br>
+            শুভ জন্মদিন প্রিয়তমা, আজ এই দিনে।
+        </div>
+    </div>
 
-    let typingTimeout;
-    function typeText(text){
-      clearTimeout(typingTimeout);
-      typedEl.textContent = '';
-      let i=0;
-      function step(){
-        if(i<=text.length){
-          typedEl.textContent = text.slice(0,i);
-          i++;
-          typingTimeout = setTimeout(step, 28 + Math.random()*20);
+    <div id="page6" class="page">
+        <div class="header">তুমি আমার সব...</div>
+        <div class="message">
+            তুমি শুধু আমার গার্লফ্রেন্ড নও, তুমি আমার বেস্ট ফ্রেন্ড, আমার অনুপ্রেরণা, আমার সবকিছু।
+        </div>
+    </div>
+
+    <div id="page7" class="page">
+        <div class="header">ভবিষ্যতের স্বপ্ন</div>
+        <div class="message">
+            তোমার হাত ধরে জীবনের বাকিটা পথ চলতে চাই। আমাদের একসাথে কাটানো দিনগুলো হবে আরো সুন্দর, আরো মধুময়।
+        </div>
+    </div>
+    
+    <div id="page8" class="page">
+        <div class="header">ধন্যবাদ, আমার জীবনে আসার জন্য</div>
+        <div class="message">
+            তুমি আমার জীবনে এসে সবকিছু বদলে দিয়েছো। তোমাকে পেয়ে আমি সত্যিই ভাগ্যবান। ধন্যবাদ আমার জীবনে আসার জন্য।
+        </div>
+    </div>
+    
+    <div id="page9" class="page">
+        <div class="header">১২ অক্টোবর 🎉</div>
+        <div class="message">
+            আজকের এই দিনটা শুধু তোমার জন্য। সারাটা দিন আনন্দে আর হাসিতে ভরে উঠুক।
+        </div>
+    </div>
+
+    <div id="page10" class="page">
+        <div class="header">অনেক অনেক ভালোবাসা!</div>
+        <div class="message">
+            এই বিশেষ দিনে তোমার জীবনের সব স্বপ্ন পূরণ হোক। সব সময় ভালো থেকো আর এভাবেই আমার পাশে থেকো।
+            <br><br>
+            ভালোবাসা সহ,<br>
+            [জারিফ❤️]
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="prevBtn" class="nav-button" style="display: none;">⬅️ পেছনে</button>
+        <button id="nextBtn" class="nav-button">সামনে ➡️</button>
+    </div>
+
+    <script>
+        const pages = document.querySelectorAll('.page');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        let currentPage = 0;
+
+        function showPage(index) {
+            pages.forEach((page, i) => {
+                page.classList.remove('active');
+                if (i === index) {
+                    page.classList.add('active');
+                }
+            });
+            updateButtons();
         }
-      }
-      step();
-    }
 
-    document.getElementById('next').addEventListener('click', ()=> showPage(idx+1));
-    document.getElementById('prev').addEventListener('click', ()=> showPage(idx-1));
-    window.addEventListener('keydown', (e)=>{ if(e.key==="ArrowRight") showPage(idx+1); if(e.key==="ArrowLeft") showPage(idx-1); });
+        function updateButtons() {
+            prevBtn.style.display = currentPage === 0 ? 'none' : 'block';
+            nextBtn.style.display = currentPage === pages.length - 1 ? 'none' : 'block';
+            if (currentPage === pages.length - 1) {
+                createConfetti();
+            }
+        }
 
-    function resizeCanvas(){ canvas.width = stage.clientWidth; canvas.height = stage.clientHeight; canvas.style.width = stage.clientWidth + 'px'; canvas.style.height = stage.clientHeight + 'px'; }
-    window.addEventListener('resize', resizeCanvas); resizeCanvas();
-    const ctx = canvas.getContext('2d');
-    let confs = [];
-    function spawnConfetti(x,y){
-      for(let i=0;i<24;i++){
-        confs.push({x:x,y:y, vx:(Math.random()-0.5)*8, vy:(-6+Math.random()*2), r:6+Math.random()*8, c:['#ff5c8a','#ffd166','#a0e7e5','#7afcff'][Math.floor(Math.random()*4)], life:80 + Math.random()*60 });
-      }
-    }
-    function burst(pageIdx){
-      spawnConfetti(canvas.width*0.5, canvas.height*0.35);
-    }
-    function confLoop(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      for(let i=confs.length-1;i>=0;i--){
-        let p = confs[i];
-        p.x += p.vx; p.y += p.vy; p.vy += 0.28; p.life -=1; p.r *= 0.995;
-        ctx.fillStyle = p.c; ctx.beginPath(); ctx.ellipse(p.x,p.y,p.r,p.r*0.8,0,0,Math.PI*2); ctx.fill();
-        if(p.life<0 || p.y>canvas.height+40) confs.splice(i,1);
-      }
-      requestAnimationFrame(confLoop);
-    }
-    confLoop();
+        function createConfetti() {
+            const confettiCount = 100;
+            const container = document.body;
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDelay = `${Math.random() * 5}s`;
+                confetti.style.animationDuration = `${5 + Math.random() * 3}s`;
+                container.appendChild(confetti);
+            }
+        }
 
-    showPage(0);
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
 
-    const photo = document.getElementById('photo');
-    let floatTimer;
-    function floatEffect(){
-      photo.style.transform = `translateY(${Math.sin(Date.now()/800)*6}px)`;
-      floatTimer = requestAnimationFrame(floatEffect);
-    }
-    floatEffect();
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+        
+        // Initial setup
+        showPage(currentPage);
 
-    setInterval(()=>{ const h = document.querySelectorAll('.heart'); h[Math.floor(Math.random()*h.length)].style.transform='scale(1.12)'; setTimeout(()=>{ h.forEach(x=>x.style.transform='scale(1)') },420); }, 2200);
-
-    let touchStartX = null;
-    stage.addEventListener('touchstart', e=>{ touchStartX = e.changedTouches[0].clientX; });
-    stage.addEventListener('touchend', e=>{ if(touchStartX===null) return; const dx = e.changedTouches[0].clientX - touchStartX; if(dx < -40) showPage(idx+1); if(dx > 40) showPage(idx-1); touchStartX=null; });
-
-    photo.onerror = function(){ photo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><rect width="100%" height="100%" fill="%23010a14"/><text x="50%" y="50%" fill="%23ffffff" font-size="26" text-anchor="middle" dy="0.3em">Tithi এর ছবি এখানে রাখুন (tithi.jpg)</text></svg>'; };
-  </script>
+    </script>
 </body>
-</html>
+          </html>
